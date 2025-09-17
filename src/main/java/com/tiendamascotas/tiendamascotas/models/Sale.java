@@ -26,6 +26,9 @@ public class Sale {
     @Column(name = "unit_price")
     private double unitPrice;
 
+    public Sale() {
+    }
+
     public Sale(int id, int productId, int customerId, int quantity, LocalDate date, double unitPrice) {
         this.id = id;
         this.productId = productId;
