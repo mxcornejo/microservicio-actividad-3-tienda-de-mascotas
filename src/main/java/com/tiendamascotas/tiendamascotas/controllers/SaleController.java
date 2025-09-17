@@ -2,7 +2,7 @@ package com.tiendamascotas.tiendamascotas.controllers;
 
 import com.tiendamascotas.tiendamascotas.dto.ProfitSummary;
 import com.tiendamascotas.tiendamascotas.models.Sale;
-import com.tiendamascotas.tiendamascotas.services.DataService;
+import com.tiendamascotas.tiendamascotas.repository.SaleRepository;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -20,62 +20,60 @@ import java.util.Map;
 @RequestMapping("/api/sales")
 public class SaleController {
 
-    private final DataService data;
+    private final SaleRepository repo;
 
-    public SaleController(DataService data) {
-        this.data = data;
+    public SaleController(SaleRepository repo) {
+        this.repo = repo;
     }
 
     // --- Listado de ventas
     @GetMapping
     public List<Sale> all() {
-        return data.obtenerVentas();
+        return repo.findAll();
     }
 
     @GetMapping("/{id}")
     public Sale byId(@PathVariable @Positive int id) {
-        return data.getSale(id).orElseThrow(() -> new IllegalArgumentException("Venta no encontrada: " + id));
+        return repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Venta no encontrada: " + id));
     }
 
     // --- Filtros
     @GetMapping("/by-date")
-    public List<Sale> byDate(@RequestParam("date")
-                             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        return data.getSalesByDate(date);
+    public List<Sale> byDate(@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return repo.findByDate(date);
     }
 
     @GetMapping("/by-range")
-    public List<Sale> byRange(@RequestParam("from")
-                              @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-                              @RequestParam("to")
-                              @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
-        if (to.isBefore(from)) throw new IllegalArgumentException("'to' no puede ser anterior a 'from'");
-        return data.getSalesByRange(from, to);
+    public List<Sale> byRange(@RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        if (to.isBefore(from))
+            throw new IllegalArgumentException("'to' no puede ser anterior a 'from'");
+        return repo.findByDateBetween(from, to);
     }
 
     // --- Ganancias (diaria, mensual, anual) como resumen de utilidades
     @GetMapping("/profit/daily")
-    public ProfitSummary daily(@RequestParam("date")
-                               @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        return data.resumenPorDia(date, "CLP");
+    public ProfitSummary daily(@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return repo.resumenPorDia(date, "CLP");
     }
 
     @GetMapping("/profit/monthly")
     public ProfitSummary monthly(@RequestParam @Min(2000) @Max(2100) int year,
-                                 @RequestParam @Min(1) @Max(12) int month) {
-        return data.resumenPorMes(year, month, "CLP");
+            @RequestParam @Min(1) @Max(12) int month) {
+        return repo.resumenPorMes(year, month, "CLP");
     }
 
     @GetMapping("/profit/annual")
     public ProfitSummary annual(@RequestParam @Min(2000) @Max(2100) int year) {
-        return data.resumenPorAnio(year, "CLP");
+        return repo.resumenPorAnio(year, "CLP");
     }
 
     @GetMapping("/stats/category-count")
     public Map<String, Integer> categoryCount(
             @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam("to")   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
-        if (to.isBefore(from)) throw new IllegalArgumentException("'to' no puede ser anterior a 'from'");
-        return data.salesUnitsByCategory(from, to);
+            @RequestParam("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        if (to.isBefore(from))
+            throw new IllegalArgumentException("'to' no puede ser anterior a 'from'");
+        return repo.salesUnitsByCategory(from, to);
     }
 }

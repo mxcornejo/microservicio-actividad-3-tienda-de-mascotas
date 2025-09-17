@@ -1,7 +1,7 @@
 package com.tiendamascotas.tiendamascotas.controllers;
 
 import com.tiendamascotas.tiendamascotas.models.Product;
-import com.tiendamascotas.tiendamascotas.services.DataService;
+import com.tiendamascotas.tiendamascotas.repository.ProductRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -12,20 +12,20 @@ import java.util.List;
 @RequestMapping("/api/productos")
 public class ProductController {
 
-    private final DataService data;
+    private final ProductRepository repo;
 
-    public ProductController(DataService data) {
-        this.data = data;
+    public ProductController(ProductRepository repo) {
+        this.repo = repo;
     }
 
     @GetMapping
     public List<Product> getAllProducts() {
-        return data.obtenerProductos();
+        return repo.findAll();
     }
 
     @GetMapping("/{id}")
     public Product getProductById(@PathVariable int id) {
-        return data.buscarProducto(id)
+        return repo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado"));
     }
 }
