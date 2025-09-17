@@ -21,8 +21,9 @@ public class Sale {
     private int customerId;
     @Column(name = "quantity")
     private int quantity;
-    @Column(name = "date")
+    @Column(name = "SALE_DATE")
     private LocalDate date;
+
     @Column(name = "unit_price")
     private double unitPrice;
 

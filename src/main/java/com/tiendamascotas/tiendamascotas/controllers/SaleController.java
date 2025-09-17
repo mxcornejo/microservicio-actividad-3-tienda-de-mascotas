@@ -39,16 +39,16 @@ public class SaleController {
 
     // --- Filtros
     @GetMapping("/by-date")
-    public List<Sale> byDate(@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+    public List<Sale> byDate(
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return repo.findByDate(date);
     }
 
     @GetMapping("/by-range")
-    public List<Sale> byRange(@RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
-        if (to.isBefore(from))
-            throw new IllegalArgumentException("'to' no puede ser anterior a 'from'");
-        return repo.findByDateBetween(from, to);
+    public List<Sale> byRange(
+            @RequestParam("start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+            @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
+        return repo.findByDateBetween(start, end);
     }
 
     // --- Ganancias (diaria, mensual, anual) como resumen de utilidades
